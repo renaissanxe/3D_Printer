@@ -3,9 +3,22 @@
 #include <stdlib.h>
 #include <string>
 #include <chrono>
-#include <ctime>   
-
+#include <time.h>
+#include <ctime>
 #include "yocto_pwm.hpp"
+
+// Allocate exactly 31 bytes for buf
+int utc_system_timestamp(char buf[]) {
+    const int bufsize = 31;
+    const int tmpsize = 21;
+    struct timespec now;
+    struct tm tm;
+    int retval = clock_gettime(CLOCK_REALTIME, &now);
+    gmtime_r(&now.tv_sec, &tm);
+    strftime(buf, tmpsize, "%Y-%m-%dT%H:%M:%S.", &tm);
+    sprintf(buf + tmpsize -1, "%09luZ", now.tv_nsec);
+    return retval;
+}
 
 void YoctoFreeAll() {
     YAPI::FreeAPI();
@@ -13,9 +26,10 @@ void YoctoFreeAll() {
 
 static void pwmChangeCallbackTest(YPwmInput *fct, const string &value)
 {
-    auto n = std::chrono::system_clock::now();
-    std::time_t t = std::chrono::system_clock::to_time_t(n);
-    std::cerr << std::ctime(&t) << " PWM Changed " << value<< std::endl;
+    struct timespec ts;
+    char buf[31];
+    utc_system_timestamp(buf);
+    std::cerr << buf<< ", PWM Changed " << value<< std::endl;
 }
 
 
@@ -62,7 +76,7 @@ int Yocto_PWM::Test() {
 }
 
 void Yocto_PWM::EnablePWMDetection(YPwmInputValueCallback callback) {
-    pwm1->registerValueCallback(callback);
+    pwm->registerValueCallback(callback);
 }
 
 void Yocto_PWM::EnterEventMode() {
@@ -78,8 +92,9 @@ void Yocto_PWM::EnterEventMode() {
 
 void yoctoTest(string dev) {
     Yocto_PWM pwm;
-    ///pwm.Detect("any");
-    pwm.Detect(dev);
+    // pwm.Detect("any");
+    int err = pwm.Detect(dev);
+    // pwm.Test();
     pwm.EnablePWMDetection(pwmChangeCallbackTest);
     pwm.EnterEventMode();
 }

@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "ML808GX control port: %s, rate: %d\n"
                     "Microplotter Signal detector port: %s\n\n", comPort, baudrate, usbPwmDevice);
-    
+#if 0   
     // TODO: Check ports, validate equipments
 
     std::cout << "Opening USB port." << std::endl;
@@ -170,15 +170,16 @@ int main(int argc, char *argv[]) {
     /* Set Baud Rate */
     cfsetospeed (&tty, (speed_t)B19200);
     cfsetispeed (&tty, (speed_t)B19200);
-
+#endif
 
 // test dispenser
+/*
     dispenser.ConnectSerial(comPort, baudrate);
     dispenser.VerifyDispenser();
     dispenser.StartDispense();
     sleep(10);
     dispenser.StopDispense();
-
+*/
 // test pwm
     yoctoTest(usbPwmDevice);
 
