@@ -26,7 +26,7 @@ int ML808GX::ConnectSerial(const char* dev, int baudrate) {
         return com_fd;
     }
 
-    err = set_interface_attribs (com_fd, baudrate, 0);  // set speed to 115,200 bps, 8n1 (no parity)
+    err = set_interface_attribs (com_fd, B(baudrate), 0);  // set speed to 115,200 bps, 8n1 (no parity)
     if(err == -1)
         return err;
     set_blocking (com_fd, 0);
@@ -45,7 +45,7 @@ int ML808GX::CmdInit() {
     // FIXME: test the delay is OK
     c = 0;
     buf[0] = 0;
-    while(n = read(com_fd, buf, 8) == 0) {
+    while((n = read(com_fd, buf, 8)) == 0) {
 	usleep (COMM_DELAY); 
         c+= COMM_DELAY;
         if(c>ACK_WAIT_US)
@@ -65,6 +65,7 @@ int ML808GX::CmdEndWithData(char data[], int size) {
     char buf[64] = {};
     int n=0;
     int c=0;
+    int n_written = 0;
     int data_size = 3;
     while((n += read(com_fd, buf+n, 64-n)) < 8) {
         usleep (COMM_DELAY); 
@@ -79,7 +80,7 @@ int ML808GX::CmdEndWithData(char data[], int size) {
     std::string reply(buf);
     if(reply == A0) {
         // send ACK
-        write(com_fd, ACK.c_str(), ACK.size());
+        n_written = write(com_fd, ACK.c_str(), ACK.size());
         c=0;
         // read message
         while((n += read(com_fd, data+n, size)) <size) {
@@ -101,11 +102,11 @@ int ML808GX::CmdEndWithData(char data[], int size) {
         }
         data[n]=0;
         // send EOT
-        write(com_fd, EOT.c_str(), EOT.size());
+        n_written = write(com_fd, EOT.c_str(), EOT.size());
         return n;
     } else if(reply == A2) {
         fprintf(stderr, "Received A2, message failed\n");
-        write(com_fd, CAN.c_str(), CAN.size());
+        n_written = write(com_fd, CAN.c_str(), CAN.size());
         usleep(ACK_WAIT_US);
         return -1;
     } else {
@@ -118,9 +119,10 @@ int ML808GX::CmdEnd() {
     char buf[16] = {};
     int n=0;
     int c=0;
+    int n_written = 0;
 
     while((n += read(com_fd, buf+n, 16-n)) <8) {
-	std::cout << "n = " << n << std::hex << ", read char: 0x" << (0xFF & buf[0]) << std::endl;
+	std::cout << "n = " << n << std::hex << ", read char: 0x" << (buf) << std::endl;
         usleep (COMM_DELAY); 
         c+= COMM_DELAY;
         if(c>ACK_WAIT_US)
@@ -131,12 +133,12 @@ int ML808GX::CmdEnd() {
     if(reply == A0) {
         // send EOT
         fprintf(stderr, "Received A0, Done\n");
-        write(com_fd, EOT.c_str(), EOT.size());
+        n_written = write(com_fd, EOT.c_str(), EOT.size());
         usleep(ACK_WAIT_US);
         return 0;
     } else if(reply == A2) {
         fprintf(stderr, "Received A2, message failed\n");
-        write(com_fd, CAN.c_str(), CAN.size());
+        n_written = write(com_fd, CAN.c_str(), CAN.size());
         usleep(ACK_WAIT_US);
         return -1;
     } else {
