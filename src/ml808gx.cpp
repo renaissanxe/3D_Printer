@@ -26,7 +26,7 @@ int ML808GX::ConnectSerial(const char* dev, int baudrate) {
         return com_fd;
     }
 
-    err = set_interface_attribs (com_fd, B(baudrate), 0);  // set speed to 115,200 bps, 8n1 (no parity)
+    err = set_interface_attribs (com_fd, B(baudrate), 0);  // set speed to 19,200 bps, 8n1 (no parity)
     if(err == -1)
         return err;
     set_blocking (com_fd, 0);
@@ -74,7 +74,6 @@ int ML808GX::CmdEndWithData(char data[], int size) {
         if(c>ACK_WAIT_US)
             break;
     }
-    //std::cout<<"DEBUG:"<<buf<<std::endl;
     buf[n] = 0;
     n=0;
     std::string reply(buf);
@@ -122,7 +121,6 @@ int ML808GX::CmdEnd() {
     int n_written = 0;
 
     while((n += read(com_fd, buf+n, 16-n)) <8) {
-	std::cout << "n = " << n << std::hex << ", read char: 0x" << (buf) << std::endl;
         usleep (COMM_DELAY); 
         c+= COMM_DELAY;
         if(c>ACK_WAIT_US)

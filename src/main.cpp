@@ -38,16 +38,15 @@ static Yocto_PWM* pwm;
 
 static void pwmChangeCallback(YPwmInput *fct, const string &value) {
     int err;
-    dispenser->ToggleDispense();
     auto n = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(n);
 
     double val = atof(value.c_str());
-
+    int status = dispenser->GetDispenserStatus();
     if(val < 10) {
         err = dispenser->StopDispense();
         std::cerr << std::ctime(&t) << "Stop Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
-    } else if (val > 40) {
+    } else if (val > 100000 && status != 1) {
         err = dispenser->StartDispense();
         std::cerr << std::ctime(&t) << "Start Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
     }
@@ -184,7 +183,7 @@ int main(int argc, char *argv[]) {
     dispenser->StopDispense();
 */
 // test pwm
-    yoctoTest(usbPwmDevice);
+   // yoctoTest(usbPwmDevice);
 
     pwm = new Yocto_PWM();
     pwm->Detect(usbPwmDevice);

@@ -76,7 +76,8 @@ int Yocto_PWM::Test() {
 }
 
 void Yocto_PWM::EnablePWMDetection(YPwmInputValueCallback callback) {
-    pwm->set_pwmReportMode(YPwmInput::PWMREPORTMODE_PWM_DUTYCYCLE); // YPwmInput::PWMREPORTMODE_PWM_FREQUENCY
+    //pwm->set_pwmReportMode(YPwmInput::PWMREPORTMODE_PWM_DUTYCYCLE); // YPwmInput::PWMREPORTMODE_PWM_FREQUENCY
+    pwm->set_pwmReportMode(YPwmInput::PWMREPORTMODE_PWM_FREQUENCY);
     pwm->registerValueCallback(callback);
 }
 
