@@ -42,14 +42,15 @@ static void pwmChangeCallback(YPwmInput *fct, const string &value) {
     auto n = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(n);
 
-    if(dispenser->GetDispenserStatus()==0) {
-        err = dispenser->StartDispense();
-        std::cerr << std::ctime(&t) << "Start Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
-    } else {
+    double val = atof(value.c_str());
+
+    if(val < 10) {
         err = dispenser->StopDispense();
         std::cerr << std::ctime(&t) << "Stop Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
+    } else if (val > 40) {
+        err = dispenser->StartDispense();
+        std::cerr << std::ctime(&t) << "Start Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
     }
-    
 }
 
 

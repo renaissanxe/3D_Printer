@@ -195,7 +195,7 @@ int ML808GX::ToggleDispense() {
 int ML808GX::StartDispense() {
     int err;
     if(dispenser_status==1)   {// already started
-        return -1;
+        return 1;
     }
 
     err = ToggleDispense();
@@ -209,7 +209,7 @@ int ML808GX::StartDispense() {
 int ML808GX::StopDispense() {
     int err;
     if(dispenser_status==0)  // already stopped
-        return -1;
+        return 1;
     
     err = ToggleDispense();
     if(err==0) {
