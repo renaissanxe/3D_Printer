@@ -53,7 +53,7 @@ int ML808GX::CmdInit() {
     }
 
     if(buf[0] == ACK.c_str()[0]) {
-        fprintf(stderr, "ACK received in %d us\n", c);
+        //fprintf(stderr, "ACK received in %d us\n", c);
         return 0;
     } else {
         fprintf(stderr, "ACK timeout in %d us\n", ACK_WAIT_US);
@@ -69,12 +69,12 @@ int ML808GX::CmdEndWithData(char data[], int size) {
     int data_size = 3;
     while((n += read(com_fd, buf+n, 64-n)) < 8) {
         usleep (COMM_DELAY); 
-	std::cout << "n = " << n << std::hex << ", read char: 0x" << (0xFF & buf[0]) << std::endl;
+	//std::cout << "n = " << n << std::hex << ", read char: 0x" << (0xFF & buf[0]) << std::endl;
         c+= COMM_DELAY;
         if(c>ACK_WAIT_US)
             break;
     }
-    std::cout<<"DEBUG:"<<buf<<std::endl;
+    //std::cout<<"DEBUG:"<<buf<<std::endl;
     buf[n] = 0;
     n=0;
     std::string reply(buf);
@@ -132,7 +132,7 @@ int ML808GX::CmdEnd() {
     std::string reply(buf);
     if(reply == A0) {
         // send EOT
-        fprintf(stderr, "Received A0, Done\n");
+        //fprintf(stderr, "Received A0, Done\n");
         n_written = write(com_fd, EOT.c_str(), EOT.size());
         usleep(ACK_WAIT_US);
         return 0;

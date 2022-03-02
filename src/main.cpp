@@ -32,21 +32,21 @@ const char* DEFAULT_MICROPLOTTER_SIG_READER_USB_PORT = "USB10";
 const int DEFAULT_COM_BAUDRATE = 115200;
 
 
-static ML808GX dispenser;
-Yocto_PWM pwm;
+static ML808GX* dispenser;
+static Yocto_PWM* pwm;
 
 
 static void pwmChangeCallback(YPwmInput *fct, const string &value) {
     int err;
-    dispenser.ToggleDispense();
+    dispenser->ToggleDispense();
     auto n = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(n);
 
-    if(dispenser.GetDispenserStatus()==0) {
-        err = dispenser.StartDispense();
+    if(dispenser->GetDispenserStatus()==0) {
+        err = dispenser->StartDispense();
         std::cerr << std::ctime(&t) << "Start Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
     } else {
-        err = dispenser.StopDispense();
+        err = dispenser->StopDispense();
         std::cerr << std::ctime(&t) << "Stop Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
     }
     
@@ -141,6 +141,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "ML808GX control port: %s, rate: %d\n"
                     "Microplotter Signal detector port: %s\n\n", comPort, baudrate, usbPwmDevice);
+
 #if 0   
     // TODO: Check ports, validate equipments
 
@@ -172,16 +173,22 @@ int main(int argc, char *argv[]) {
     cfsetispeed (&tty, (speed_t)B19200);
 #endif
 
+    dispenser = new ML808GX();
+    dispenser->ConnectSerial(comPort, baudrate);
+    dispenser->VerifyDispenser();
 // test dispenser
 /*
-    dispenser.ConnectSerial(comPort, baudrate);
-    dispenser.VerifyDispenser();
-    dispenser.StartDispense();
+    dispenser->StartDispense();
     sleep(10);
-    dispenser.StopDispense();
+    dispenser->StopDispense();
 */
 // test pwm
     yoctoTest(usbPwmDevice);
+
+    pwm = new Yocto_PWM();
+    pwm->Detect(usbPwmDevice);
+    pwm->EnablePWMDetection(pwmChangeCallback);
+    pwm->EnterEventMode();
 
 
     signal(SIGINT, system_sig_handler);
@@ -190,11 +197,6 @@ int main(int argc, char *argv[]) {
     //while(1) {
 
     //}
-
-// Don't touch this 
-    //pwm.Detect();
-    //pwm.EnablePWMDetection(pwmChangeCallback);
-    //pwm.EnterEventMode();
 
     exit(EXIT_SUCCESS);
 }
