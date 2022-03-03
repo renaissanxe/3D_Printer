@@ -23,6 +23,7 @@
 
 #include "ml808gx.hpp"
 #include "yocto_pwm.hpp"
+#include "gpio_direct_register_access.hpp"
 
 // default configuration
 const char* DEFAULT_CONFIG_FILE = "config.ini";
@@ -44,9 +45,11 @@ static void pwmChangeCallback(YPwmInput *fct, const string &value) {
     double val = atof(value.c_str());
     int status = dispenser->GetDispenserStatus();
     if(val < 10) {
+	GPIO_CLR = 1<<21;
         err = dispenser->StopDispense();
         std::cerr << std::ctime(&t) << "Stop Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
     } else if (val > 100000 && status != 1) {
+	GPIO_SET = 1<<21;
         err = dispenser->StartDispense();
         std::cerr << std::ctime(&t) << "Start Dispenser, PWM:" << value<<", Err = "<<err<< std::endl;
     }
@@ -77,6 +80,11 @@ int main(int argc, char *argv[]) {
     sprintf(comPort, "%s", DEFAULT_ML808GX_SERIAL_PORT);
     sprintf(usbPwmDevice, "%s", DEFAULT_MICROPLOTTER_SIG_READER_USB_PORT);
     baudrate = DEFAULT_COM_BAUDRATE;
+    
+    setup_io();
+    INP_GPIO(21);
+    OUT_GPIO(21);
+
     
     // try to load config file to overwrite default value
     INIReader* reader = new INIReader(cfgFile);

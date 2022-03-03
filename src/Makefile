@@ -20,8 +20,8 @@ YOCTO_LIB := ${YOCTO_LIB_PATH}/libyocto-static.a
 
 
 TARGET := dispenserController
-OBJS := main.o ml808gx.o yocto_pwm.o
-DEPS := INIReader.hpp serial.h ml808gx.hpp yocto_pwm.hpp
+OBJS := main.o ml808gx.o yocto_pwm.o gpio_direct_register_access.o
+DEPS := INIReader.hpp serial.h ml808gx.hpp yocto_pwm.hpp gpio_direct_register_access.hpp
 LIBS := ${YOCTO_LIB} -lm -lpthread -lusb-1.0
 CFLAGS += -I. -I${YOCTO_API_SRC} 
 
